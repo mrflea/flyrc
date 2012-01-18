@@ -15,7 +15,7 @@ util.run_client(cli)
 ```
 
 > Flyrcbot has joined #flyrctest<br />
-> <mr_flea> !quit<br />
+> &lt;mr_flea&gt; !quit<br />
 > Flyrcbot has quit [Quit: Requested by mr_flea.]
 
 ## Handlers
