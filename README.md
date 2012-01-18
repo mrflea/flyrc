@@ -14,8 +14,8 @@ cli.add_handler(handler.QuitWhenAsked())
 util.run_client(cli)
 ```
 
-> Flyrcbot has joined #flyrctest
-> <mr_flea> !quit
+> Flyrcbot has joined #flyrctest<br />
+> <mr_flea> !quit<br />
 > Flyrcbot has quit [Quit: Requested by mr_flea.]
 
 ## Handlers
