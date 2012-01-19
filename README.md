@@ -1,5 +1,7 @@
 # Flyrc
 
+Get your IRC bot off the ground with Flyrc!
+
 ## Introduction
 
 Flyrc is a modular library for IRC (Internet Relay Chat) using gevent.  Flyrc uses 'handler' objects to dispatch server messages.  The client is completely extensible, with a focus on supporting modern IRC features.
@@ -52,7 +54,7 @@ class QuitWhenAsked(object):
 
 The client is the core of Flyrc.  The client takes care of establishing the connection to the server, dispatching events, and rate-limiting message sending.  The client is also (presently) the only part of Flyrc that uses gevent, so it can be replaced with a another compatible client to remove the dependency upon gevent.
 
-By default, the client handles no messages.  As it would be tedious to add a bunch of handlers each time a Flyrc bot is written, a SimpleClient convenience class that defines many common handlers is offered.  These include:
+By default, the client handles no messages.  As it would be tedious to add a bunch of handlers each time a Flyrc bot is written, a SimpleClient convenience class that includes many common handlers by default is offered.  These include:
 
 * Ping, for sending the PONG reply to PING messages
 * User, for sending the USER and NICK messages upon connection to the IRC server
@@ -94,6 +96,22 @@ The client also generates several special events about client operation.  The na
 ## Default Handlers
 
 Flyrc ships with some default handlers, which will (TODO) eventually be documented here.
+
+* Ping - respond to server PING messages
+* AutoJoin - automatically join channels
+* NickInUse - change to alternate nicks if the attempted nick is already in use
+* SASL - support SASL services authentication (note: this will likely be written into more of a SASL framework)
+* User - send the NICK and USER messages upon connection to register with the IRC server
+* LogToConsole - log all messages and connection/disconnection/socket error events to console
+* GenericDisconnect - gracefully handle the server closing our socket
+* Oper - automatically oper upon connection, and disable ratelimiting once opered
+* MessageProcessor - split privmsg/notice events into many smaller, easier-to-deal-with events
+* BasicCTCP - handle CTCP PING, VERSION, and CLIENTINFO requests
+* BasicChannelCommand - generate command_ events from channel messages, with a configurable prefix; implements BasicCommand
+* BasicPrivateCommand - generate command_ events from private messages; implements BasicCommand
+* QuitWhenAsked - quit upon receiving the "quit" command
+* LogCommands - log all commands to console
+* InfoTracker - (still under development) save all whois, who, etc. information into structures accessible from other handlers; provide events to notify other handlers when (new) data is available
 
 ## License
 
