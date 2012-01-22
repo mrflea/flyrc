@@ -22,6 +22,48 @@ class NickInUse(object):
 
 	irc_ERR_NICKCOLLISION = irc_ERR_NICKNAMEINUSE
 
+class CAP(object):
+	"""Currently half-implemented: I can't think of a good way to figure out when to send CAP END."""
+	def irc_client_load(self, client):
+		client.cap_request = set([])
+		client.cap_available = set([])
+		client.cap_acknowledged = set([])
+		client.cap_denied = set([])
+
+	def irc_client_connect(self, client):
+		client.cap_available = set([])
+		client.cap_acknowledged = set([])
+		client.cap_denied = set([])
+
+	irc_client_disconnect = irc_client_connect
+
+	def irc_client_unload(self, client):
+		del client.cap_request
+		del client.cap_available
+		del client.cap_acknowledged
+		del client.cap_denied
+
+	def irc_client_connected(self, client):
+		if client.cap_req:
+			client.send(message.cap('LS'))
+
+	def irc_CAP(self, client, msg):
+		caps = set(msg.args[2].upper().split())
+		if msg.args[1] == "LS":
+			client.cap_available = caps
+			client.cap_denied = client.cap_request - client.cap_available
+			client.send(message.cap('REQ', ' '.join(client.cap_request - client.cap_denied)))
+			for cap in client.cap_denied:
+				client.trigger_handler('cap_denied_'+cap.lower())
+		if msg.args[1] == "ACK":
+			client.cap_acknowledged = caps
+			for cap in caps:
+				client.trigger_handler('cap_acknowledged_'+cap.lower())
+		if msg.args[1] == "NAQ":
+			client.cap_denied |= caps
+			for cap in caps:
+				client.trigger_handler('cap_denied_'+cap.lower())
+
 class SASL(object):
 	def __init__(self, user, password):
 		self.auth = base64.b64encode("%s\0%s\0%s" % (user, user, password))
