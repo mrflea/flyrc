@@ -47,6 +47,29 @@ class SASL(object):
 		client.send(message.authenticate(self.auth))
 		client.send(message.cap('END'))
 
+class ISupport(object):
+	"""This relies on the server sending RPL_VERSION right before RPL_ISUPPORT."""
+	def irc_client_load(self, client):
+		client.isupport = {}
+
+	def irc_client_unload(self, client):
+		del client.isupport
+
+	irc_RPL_VERSION = irc_client_load
+
+	def irc_RPL_ISUPPORT(self, client, msg):
+		tokens = msg.args[1:-1]
+		for token in tokens:
+			token = token.split('=', 1)
+			value = True
+			if len(token) == 2:
+				token, value = token
+			else:
+				token = token[0]
+			token = token.upper()
+			# TODO: parse value to make it more useful.
+			client.isupport[token] = value
+
 class User(object):
 	def __init__(self, nick, user, gecos):
 		self.nick = nick
