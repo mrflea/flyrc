@@ -46,6 +46,14 @@ class Step():
 	CONNECT=3
 
 class Message(object):
+	@classmethod
+	def parse(cls, text):
+		prefix, command, args = irc_split(text)
+		source = None
+		if prefix:
+			source = hostmask.Hostmask.parse(prefix)
+		return cls(source, command, args)
+
 	def __init__(self, s, c, a):
 		self.source = s
 		self.command = c
@@ -64,13 +72,6 @@ class Error(object):
 
 	def __repr__(self):
 		return "<Error(%s)>" % self.e.__repr__
-
-def parse_message(text):
-	prefix, command, args = irc_split(text)
-	source = None
-	if prefix:
-		source = hostmask.parse_hostmask(prefix)
-	return Message(source, command, args)
 
 def _gen_func(name, command):
 	globals()[name] = lambda *args: Message(None, command, list(args))

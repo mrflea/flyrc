@@ -206,7 +206,7 @@ class Client(object):
 				lines = buf.split('\r\n')
 				buf = lines.pop()
 				for line in lines:
-					self._rqueue.put(message.parse_message(line))
+					self._rqueue.put(message.Message.parse(line))
 			gevent.sleep(0)
 
 	def dependency_satisfier(self, dep):

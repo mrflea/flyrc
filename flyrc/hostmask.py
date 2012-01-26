@@ -1,18 +1,20 @@
 from flyrc import util
 
-def parse_hostmask(text):
-	nick = None
-	user = None
-	host = None
-	if text:
-		if text.find('!') != -1:
-			nick, text = text.split('!', 1)
-			user, host = text.split('@', 1)
-		else:
-			nick = text
-	return Hostmask(nick, user, host)
 
 class Hostmask(object):
+	@classmethod
+	def parse(cls, text):
+		nick = None
+		user = None
+		host = None
+		if text:
+			if text.find('!') != -1:
+				nick, text = text.split('!', 1)
+				user, host = text.split('@', 1)
+			else:
+				nick = text
+		return cls(nick, user, host)
+
 	def __init__(self, n, u, h):
 		self.nick = n
 		self.user = u
