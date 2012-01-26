@@ -63,7 +63,7 @@ class Message(object):
 		return irc_join(self.source, self.command, self.args)
 
 	def __repr__(self):
-		return "<Message(%s, %s, %s)>" % (repr(self.source), repr(self.command), repr(self.args))
+		return "<%s.%s(%s, %s, %s)>" % (type(self).__module__, type(self).__name__, repr(self.source), repr(self.command), repr(self.args))
 
 class Error(object):
 	def __init__(self, e, step=Step.NONE):
@@ -71,7 +71,7 @@ class Error(object):
 		self.step = step
 
 	def __repr__(self):
-		return "<Error(%s)>" % self.e.__repr__
+		return "<%s.%s(%s)>" % (type(self).__module__, type(self).__name__, self.e.__repr__)
 
 def _gen_func(name, command):
 	globals()[name] = lambda *args: Message(None, command, list(args))

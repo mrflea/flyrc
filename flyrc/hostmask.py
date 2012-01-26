@@ -26,4 +26,4 @@ class Hostmask(object):
 			return self.nick
 
 	def __repr__(self):
-		return "<Hostmask(%s, %s, %s)>" % (repr(self.nick), repr(self.user), repr(self.host))
+		return "<%s.%s(%s, %s, %s)>" % (type(self).__module__, type(self).__name__, repr(self.nick), repr(self.user), repr(self.host))
