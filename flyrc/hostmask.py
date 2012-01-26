@@ -1,5 +1,4 @@
-from flyrc import util
-
+#!/usr/bin/python
 
 class Hostmask(object):
 	@classmethod
