@@ -24,65 +24,82 @@ class NickInUse(object):
 
 class CAP(object):
 	"""Currently half-implemented: I can't think of a good way to figure out when to send CAP END."""
+	def __init__(self):
+		self.c = dict()
+
 	def irc_client_load(self, client):
-		client.cap_request = set([])
-		client.cap_available = set([])
-		client.cap_acknowledged = set([])
-		client.cap_denied = set([])
+		self.c[client]['req'] = set([])
+		self.c[client]['interactive'] = set([])
+		self.c[client]['pending'] = set([])
+		self.c[client]['ack'] = set([])
+		self.c[client]['rej'] = set([])
 
 	def irc_client_connect(self, client):
-		client.cap_available = set([])
-		client.cap_acknowledged = set([])
-		client.cap_denied = set([])
+		self.c[client]['pending'] = set([])
+		self.c[client]['ack'] = set([])
+		self.c[client]['rej'] = set([])
 
 	irc_client_disconnect = irc_client_connect
-
-	def irc_client_unload(self, client):
-		del client.cap_request
-		del client.cap_available
-		del client.cap_acknowledged
-		del client.cap_denied
 
 	def irc_client_connected(self, client):
 		if client.cap_req:
 			client.send(message.cap('LS'))
 
+	def irc_cap_request(self, client, cap):
+		self.c[client]['req'] |= set([lower(cap)])
+
+	def irc_cap_request_interactive(self, client, cap):
+		self.c[client]['interactive'] |= set([lower(cap)])
+
+	def irc_cap_request_remove(self, client, cap):
+		self.c[client]['req'] -= set([lower(cap)])
+
+	def irc_cap_request_interactive_remove(self, client, cap):
+		self.c[client]['interactive'] -= set([lower(cap)])
+
+	def irc_cap_interactive_finished(self, client, cap):
+		self.c[client]['pending'] -= set([lower(cap)])
+		self.try_end(client)
+
+	def try_end(self, client):
+		if not self.c[client]['pending']:
+			client.send(message.cap('END'))
+
 	def irc_CAP(self, client, msg):
-		caps = set(msg.args[2].upper().split())
+		caps = set(msg.args[2].lower().split())
 		if msg.args[1] == "LS":
-			client.cap_available = caps
-			client.cap_denied = client.cap_request - client.cap_available
-			client.send(message.cap('REQ', ' '.join(client.cap_request - client.cap_denied)))
-			for cap in client.cap_denied:
-				client.trigger_handler('cap_denied_'+cap.lower())
+			sought = (self.c[client]['req'] | self.c[client]['interactive'])
+			unavailable = sought - caps
+			for cap in unavailable:
+				client.trigger_handler('cap_denied_'+cap)
+			client.send(message.cap('REQ', ' '.join(sought - unavailable)))
 		if msg.args[1] == "ACK":
 			client.cap_acknowledged = caps
 			for cap in caps:
-				client.trigger_handler('cap_acknowledged_'+cap.lower())
+				client.trigger_handler('cap_acknowledged_'+cap)
+				if cap in self.c[client]['interactive']:
+					self.c[client]['pending'] |= set([cap])
+			self.try_end(client)
 		if msg.args[1] == "NAQ":
 			client.cap_denied |= caps
 			for cap in caps:
-				client.trigger_handler('cap_denied_'+cap.lower())
+				client.trigger_handler('cap_denied_'+cap)
+			self.try_end(client)
 
-class SASL(object):
+class SASLPlain(object):
+	DEPENDENCIES = [CAP]
+
 	def __init__(self, user, password):
 		self.auth = base64.b64encode("%s\0%s\0%s" % (user, user, password))
 
-	def irc_client_connected(self, client):
-		client.send(message.cap('LS'))
+	def irc_client_load(self, client):
+		client.trigger_handler('cap_request_interactive', 'sasl')
 
-	def irc_CAP(self, client, msg):
-		caps = msg.args[2].upper().split()
-		if msg.args[1] == "LS":
-			if "SASL" in caps:
-				client.send(message.cap('REQ', 'SASL'))
-		elif msg.args[1] == "ACK":
-			if "SASL" in caps:
-				# Send the AUTHENTICATE.
-				client.send(message.authenticate("PLAIN"))
-		elif msg.args[1] == "NAQ":
-			if "SASL" in caps:
-				client.send(message.cap('END'))
+	def irc_client_unload(self, client):
+		client.trigger_handler('cap_request_interactive_remove', 'sasl')
+
+	def irc_cap_acknowledged_sasl(self, client):
+		client.send(message.authenticate("PLAIN"))
 
 	def irc_AUTHENTICATE(self, client, msg):
 		# We only support PLAIN, so we don't have to do much work here...
