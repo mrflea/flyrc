@@ -23,7 +23,6 @@ class NickInUse(object):
 	irc_ERR_NICKCOLLISION = irc_ERR_NICKNAMEINUSE
 
 class CAP(object):
-	"""Currently half-implemented: I can't think of a good way to figure out when to send CAP END."""
 	def __init__(self):
 		self.c = dict()
 
