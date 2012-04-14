@@ -91,7 +91,8 @@ _functions = [
 	'quit',
 	'cap',
 	'authenticate',
-	'mode'
+	'mode',
+	'topic'
 ]
 
 for name in _functions:
