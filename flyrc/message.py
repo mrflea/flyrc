@@ -78,7 +78,7 @@ class Message(object):
 	def args(self):
 		return self._args
 
-	@property.setter
+	@args.setter
 	def args(self, newargs):
 		for i in range(len(args)):
 			if len(args[i]) == 0:
