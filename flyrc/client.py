@@ -94,7 +94,7 @@ class Client(object):
 		self.enforce_order = False
 
 	def _create_socket(self):
-		sock = gevent.socket.socket()
+		sock = gevent.socket.create_connection((self.host, self.port))
 		if self.ssl:
 			sock = gevent.ssl.wrap_socket(sock)
 
@@ -120,7 +120,6 @@ class Client(object):
 	def start(self):
 		try:
 			self._socket = self._create_socket()
-			self._socket.connect((self.host, self.port))
 		except socket.error, e:
 			self._ioerror(e, message.Step.CONNECT)
 		else:
