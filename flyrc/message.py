@@ -3,11 +3,12 @@
 from flyrc import hostmask
 
 class ProtocolViolation(Exception):
-	def __init__(self, value):
+	def __init__(self, value, position=None):
 		self.value = value
+		self.position = position
 
 	def __str__(self):
-		return repr(self.value)
+		return "<%s> %s" % (str(self.position), repr(self.value))
 
 class InvalidArgumentOrder(ProtocolViolation):
 	"""
@@ -44,7 +45,7 @@ def irc_join(prefix, command, args):
 	if prefix:
 		message += ':' + str(prefix) + ' '
 	message += str(command)
-	for line in args:
+	for arg in args:
 		if len(arg) == 0:
 			continue # shouldn't happen.
 		elif arg[0] == ':' or arg.find(' ') != -1:
@@ -80,13 +81,11 @@ class Message(object):
 
 	@args.setter
 	def args(self, newargs):
-		for i in range(len(args)):
-			if len(args[i]) == 0:
-				raise EmptyArgument(args[i])
-				return
-			if i != len(args)-1 and (args[i][0] == ':' or args[i].find(' ') != -1):
-				raise InvalidArgumentOrder(args[i])
-				return
+		for i, arg in enumerate(newargs):
+			if len(arg) == 0:
+				raise EmptyArgument(arg, i)
+			if i != len(newargs)-1 and (arg[0] == ':' or arg.find(' ') != -1):
+				raise InvalidArgumentOrder(arg, i)
 		self._args = newargs
 
 	def render(self):
