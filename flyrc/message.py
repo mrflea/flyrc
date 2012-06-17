@@ -69,6 +69,7 @@ class Message(object):
 		return cls(source, command, args)
 
 	def __init__(self, s, c, a):
+		self._args = None
 		self.source = s
 		self.command = c
 		self.args = a
