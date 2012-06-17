@@ -44,15 +44,13 @@ def irc_join(prefix, command, args):
 	if prefix:
 		message += ':' + str(prefix) + ' '
 	message += str(command)
-	for i in range(len(args)):
-		if len(args[i]) == 0:
-			raise EmptyArgument(args[i])
-		elif args[i][0] == ':' or args[i].find(' ') != -1:
-			if i != len(args)-1:
-				raise InvalidArgumentOrder(args[i])
-			message += ' :' + args[i]
+	for line in args:
+		if len(arg) == 0:
+			continue # shouldn't happen.
+		elif arg[0] == ':' or arg.find(' ') != -1:
+			message += ' :' + arg
 		else:
-			message += ' ' + args[i]
+			message += ' ' + arg
 	return message
 
 class Step():
@@ -74,6 +72,21 @@ class Message(object):
 		self.source = s
 		self.command = c
 		self.args = a
+
+	@property
+	def args(self):
+		return self._args
+
+	@property.setter
+	def args(self, newargs):
+		for i in range(len(args)):
+			if len(args[i]) == 0:
+				raise EmptyArgument(args[i])
+				return
+			if i != len(args)-1 and (args[i][0] == ':' or args[i].find(' ') != -1):
+				raise InvalidArgumentOrder(args[i])
+				return
+		self._args = newargs
 
 	def render(self):
 		return irc_join(self.source, self.command, self.args)
