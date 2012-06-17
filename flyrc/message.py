@@ -9,6 +9,20 @@ class ProtocolViolation(Exception):
 	def __str__(self):
 		return repr(self.value)
 
+class InvalidArgumentOrder(ProtocolViolation):
+	"""
+	An argument containing spaces was found before
+	the end of the argument list, or multiple arguments
+	containing spaces were provided.
+	"""
+	pass
+
+class EmptyArgument(ProtocolViolation):
+	"""
+	An argument was an empty string.
+	"""
+	pass
+
 def irc_split(text):
 	prefix = None
 	command = None
@@ -31,9 +45,11 @@ def irc_join(prefix, command, args):
 		message += ':' + str(prefix) + ' '
 	message += str(command)
 	for i in range(len(args)):
+		if len(args[i]) == 0:
+			raise EmptyArgument(args[i])
 		if args[i][0] == ':' or args[i].find(' ') != -1:
 			if i != len(args)-1:
-				raise ProtocolViolation(args[i])
+				raise InvalidArgumentOrder(args[i])
 			message += ' :' + args[i]
 		else:
 			message += ' ' + args[i]
