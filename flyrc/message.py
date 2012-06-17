@@ -47,7 +47,7 @@ def irc_join(prefix, command, args):
 	for i in range(len(args)):
 		if len(args[i]) == 0:
 			raise EmptyArgument(args[i])
-		if args[i][0] == ':' or args[i].find(' ') != -1:
+		elif args[i][0] == ':' or args[i].find(' ') != -1:
 			if i != len(args)-1:
 				raise InvalidArgumentOrder(args[i])
 			message += ' :' + args[i]
