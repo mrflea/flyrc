@@ -83,7 +83,7 @@ class Message(object):
 	def args(self, newargs):
 		for i, arg in enumerate(newargs):
 			if len(arg) == 0:
-				raise EmptyArgument(arg, i)
+				raise EmptyArgument(newargs, i)
 			if i != len(newargs)-1 and (arg[0] == ':' or arg.find(' ') != -1):
 				raise InvalidArgumentOrder(arg, i)
 		self._args = newargs
