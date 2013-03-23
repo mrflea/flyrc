@@ -81,6 +81,8 @@ class Message(object):
 
 	@args.setter
 	def args(self, newargs):
+		# Ignore any empty arguments.
+		newargs = [x for x in newargs if x != ""]
 		for i, arg in enumerate(newargs):
 			if i != len(newargs)-1 and (arg[0] == ':' or arg.find(' ') != -1):
 				raise InvalidArgumentOrder(arg, i)
