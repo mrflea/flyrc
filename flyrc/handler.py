@@ -258,11 +258,11 @@ class BasicPrivateCommand(BasicCommand):
 	DEPENDENCIES = [MessageProcessor]
 
 	def irc_private_message(self, client, source, text):
-		match = re.match("^([^ ]+ ?(.*)", text)
+		match = re.match("^([^ ]+) ?(.*)", text)
 		if match:
 			cmd = match.group(1).lower()
 			args = match.group(2)
-			client.trigger_handler('global_command', cmd, source, target, args)
+			client.trigger_handler('global_command', cmd, source, None, args)
 			client.trigger_handler('command_'+cmd, source, None, args)
 
 class QuitWhenAsked(object):
