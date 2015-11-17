@@ -74,13 +74,14 @@ class InvalidDependencyTree(DependencyViolation):
 	"""
 
 class Client(object):
-	def __init__(self, host, port, ssl=False, timeout=300):
+	def __init__(self, host, port, ssl=False, timeout=300, source=None):
 		self._rqueue = queue.Queue()
 		self._squeue = queue.Queue()
 		self.host = host
 		self.port = port
 		self.ssl = ssl
 		self._timeout = timeout
+		self._source = source or ''
 		self._socket = None
 		self._group = gevent.pool.Group()
 		self._coregroup = gevent.pool.Group()
@@ -94,7 +95,7 @@ class Client(object):
 		self.enforce_order = False
 
 	def _create_socket(self):
-		sock = gevent.socket.create_connection((self.host, self.port))
+		sock = gevent.socket.create_connection((self.host, self.port), source_address=(self._source, 0))
 		if self.ssl:
 			sock = gevent.ssl.wrap_socket(sock)
 
@@ -290,8 +291,8 @@ class Client(object):
 
 # A simple client that can stay connected to an IRC network and supports NickServ/SASL authentication.
 class SimpleClient(Client):
-	def __init__(self, nick, user, gecos, host, port, ssl=False, timeout=300, autoreconnect=False, version=None):
-		super(SimpleClient, self).__init__(host, port, ssl, timeout)
+	def __init__(self, nick, user, gecos, host, port, ssl=False, timeout=300, autoreconnect=False, version=None, source=None):
+		super(SimpleClient, self).__init__(host, port, ssl, timeout, source)
 
 		self.add_handler(handler.Ping())
 		self.add_handler(handler.User(nick, user, gecos))
